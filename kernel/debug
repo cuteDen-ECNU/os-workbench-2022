@@ -1,0 +1,10 @@
+#!/bin/bash
+
+qemu-system-x86_64 \
+    -machine accel=tcg \
+    -smp 2 \
+    -S -s \
+    -drive format=raw,file=./build/kernel-x86_64-qemu &
+pid=$!
+
+# gdb -x kernel.gdb; kill -9 $!

@@ -8,9 +8,9 @@ struct task {
   void   (*entry)(void *);
   Context  *context;
   uint8_t *stack;
-  enum {
-    READY,                            
-    RUNNING,
+  enum {                         
+    RUNNABLE,
+    BLOCKED,
     NEVER_SCHEDUlE,
   }status;
 };

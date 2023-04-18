@@ -15,8 +15,8 @@ static void tty_reader(void *arg) {
 }
 
 task_t* task_alloc() {
-  task_t* task = pmm->alloc(sizeof(task_t));
-  printf("sizeof(task) = %d\n", sizeof(task));
+  task_t* task = pmm->alloc(sizeof(struct task));
+  printf("sizeof(*task) = %d\n", sizeof(*task));
   return task;
 }
 

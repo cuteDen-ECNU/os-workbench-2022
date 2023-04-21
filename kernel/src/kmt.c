@@ -72,13 +72,12 @@ static Context* kmt_context_save(Event ev, Context *context) {
 
 static Context* kmt_context_schedule(Event ev, Context *context) {
     int cpu = cpu_current();
-    panic_on(current_tasks[cpu] == NULL, "schedule null task!");
+    panic_on(task_list == NULL, "schedule null task!");
     
-    task_t* task = current_tasks[cpu];
+    task_t* task = task_list;
+    print_task(task_list);
     bool quit_flag = false;
     while(1){
-        current_tasks[cpu] = task_list;
-        // panic_on(current_tasks[cpu]->fd == current_tasks[cpu], "current_tasks[cpu].fd == current_tasks[cpu]");
         current_tasks[cpu] = current_tasks[cpu]->fd;
 
         switch (current_tasks[cpu]->status)

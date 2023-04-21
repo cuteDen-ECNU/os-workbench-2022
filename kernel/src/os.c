@@ -10,14 +10,14 @@ sem_t empty, fill;
 void producer(void *arg) { 
   while (1) {
     P(&empty); 
-    putch('('); putch('\n');
+    putch('('); 
     V(&fill);
   } 
 }
 void consumer(void *arg) {
    while (1) {
      P(&fill);  
-     putch(')');putch('\n'); 
+     putch(')');
      V(&empty); 
    } 
 }

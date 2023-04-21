@@ -54,8 +54,11 @@ static void *kalloc(size_t size) {
     uintptr_t start = 0x0;
     size += sizeof(size_t); // 前8B存放大小
     size_t align_size = 1 << (log2(size) + 1);
+
     lock_acquire(&print_lock);
+    #ifdef verbose_on
     printf("CPU#%d#: align_size = %x\n", cpu_current(), align_size);
+    #endif
     lock_release(&print_lock);
 
     /* 找到最小存在块 */
@@ -102,9 +105,11 @@ static void kfree(void *ptr) {
   // char tmp[0x100] = {0};
   // sprintf(tmp, "CPU#%d#: kfree ptr = %p\n", cpu_current() , ptr);
   // printf("%s", tmp);
+#ifdef verbose_on
   lock_acquire(&print_lock);
   printf( "CPU#%d#: kfree ptr = %p\n", cpu_current() , ptr);
   lock_release(&print_lock);
+#endif
   uintptr_t new_start = Queue_Merge(q, start, size);
   
 

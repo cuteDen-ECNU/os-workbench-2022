@@ -82,9 +82,13 @@ void print_spare_queue(spare_queue_t* q){
     } 
     sprintf(buf, "%s head = %p, tail = %p\n", buf, q->head[i], q->tail[i]); 
     // print(" head = %p, tail = %p\n", q->head[i], q->tail[i]);
+
     lock_acquire(&print_lock);
+#ifdef verbose_on
     printf("%s", buf);
+#endif
     lock_release(&print_lock);
+
   }
 }
 
@@ -246,9 +250,11 @@ uintptr_t Queue_Merge(spare_queue_t *q, uintptr_t start, size_t size){
       }
       
       if(q->head[que_number] == NULL)q->tail[que_number] = NULL;
+#ifdef verbose_on
       lock_acquire(&print_lock);
       printf("CPU#%d#: spare_node [%p, %p) and [%p, %p) merge \n", cpu_current(), start, start + (uintptr_t)size, friend_pos, friend_pos + (uintptr_t)size);
       lock_release(&print_lock);
+#endif
       lock_release(&q->tail_lock[que_number]); lock_release(&q->head_lock[que_number]);
       return friend_pos > start? start : friend_pos;
     }

@@ -157,7 +157,7 @@ void kmt_sem_wait(sem_t *sem) {
     }
     kmt_spin_unlock(&sem->lock);
     if (success == false) {  // 如果 P 失败，不能继续执行
-        iset(true);        // (注意此时可能有线程执行 V 操作)
+        iset(false);        // (注意此时可能有线程执行 V 操作)
         yield(); // 引发一次上下文切换
     }
 }

@@ -71,7 +71,8 @@ handler_info* handlers_sorted_by_seq; // header
 static void on_irq(int seq, int event, handler_t handler){
   handler_info* p = handlers_sorted_by_seq, *pre = NULL;
   while(p){
-    if(p->seq < seq)break;
+    // bool b = (p->seq > seq);
+    if(p->seq > seq)break;
     pre = p;
     p = p->next;
   }
@@ -89,8 +90,8 @@ static void on_irq(int seq, int event, handler_t handler){
 }
 static Context *os_trap(Event ev, Context *ctx) {
   Context *next = NULL;
-  handler_info* h = handlers_sorted_by_seq;
-  for (; h != NULL; ++h) {
+
+  for (handler_info* h = handlers_sorted_by_seq; h != NULL; ++h) {
     if (h->event == EVENT_NULL || h->event == ev.event) {
       Context *r = h->handler(ev, ctx);
       panic_on(r && next, "returning multiple contexts");

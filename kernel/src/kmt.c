@@ -78,7 +78,9 @@ static Context* kmt_context_schedule(Event ev, Context *context) {
     task_t* task = current_tasks[cpu];
     bool quit_flag = false;
     while(1){
+        
         current_tasks[cpu] = current_tasks[cpu]->fd;
+
         switch (current_tasks[cpu]->status)
         {
             case RUNNABLE:
@@ -157,7 +159,7 @@ void kmt_sem_wait(sem_t *sem) {
     }
     kmt_spin_unlock(&sem->lock);
     if (success == false) {  // 如果 P 失败，不能继续执行
-        iset(false);        // (注意此时可能有线程执行 V 操作)
+                 // (注意此时可能有线程执行 V 操作)
         yield(); // 引发一次上下文切换
     }
 }

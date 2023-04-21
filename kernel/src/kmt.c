@@ -78,7 +78,7 @@ static Context* kmt_context_schedule(Event ev, Context *context) {
     bool quit_flag = false;
     while(1){
         current_tasks[cpu] = task_list;
-        panic_on(current_tasks[cpu]->fd == current_tasks[cpu], "current_tasks[cpu].fd == current_tasks[cpu]");
+        // panic_on(current_tasks[cpu]->fd == current_tasks[cpu], "current_tasks[cpu].fd == current_tasks[cpu]");
         current_tasks[cpu] = current_tasks[cpu]->fd;
 
         switch (current_tasks[cpu]->status)

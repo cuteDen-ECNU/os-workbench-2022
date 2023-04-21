@@ -9,6 +9,7 @@ struct task {
   Context  *context;
   uint8_t *stack;
   enum {                         
+    RUNNING,
     RUNNABLE,
     BLOCKED,
     NEVER_SCHEDUlE,
@@ -17,9 +18,10 @@ struct task {
 
 struct spinlock {
   const char *name;
+  int locked;
   enum{
-    LOCK,
     UNLOCK,
+    LOCK,
   }lock;
 };
 

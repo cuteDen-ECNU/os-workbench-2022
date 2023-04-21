@@ -89,6 +89,7 @@ static Context* kmt_context_schedule(Event ev, Context *context) {
         }
         if(quit_flag == true && current_tasks[cpu] != task){
             current_tasks[cpu]->status = RUNNING;
+            printf("111");
             break;
         }
     }

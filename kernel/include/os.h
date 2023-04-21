@@ -3,7 +3,7 @@
 #include <common.h>
 
 struct task {
-  struct task *next;
+  struct task *bk, *fd;
   const char *name;
   void   (*entry)(void *);
   Context  *context;
@@ -26,6 +26,9 @@ struct spinlock {
 };
 
 struct semaphore {
-  // TODO
+  
+  int count;
+  spinlock_t lock;
+  task_t *list_head;
 };
 #endif

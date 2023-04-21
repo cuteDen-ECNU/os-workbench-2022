@@ -6,8 +6,20 @@ sem_t empty, fill;
 #define V kmt->sem_signal
 #define DEBUG_LOCAL 
 
-void producer(void *arg) { while (1) { P(&empty); putch('('); V(&fill);  } }
-void consumer(void *arg) { while (1) { P(&fill);  putch(')'); V(&empty); } }
+void producer(void *arg) { 
+  while (1) {
+    P(&empty); 
+    putch('('); 
+    V(&fill);
+  } 
+}
+void consumer(void *arg) {
+   while (1) {
+     P(&fill);  
+     putch(')'); 
+     V(&empty); 
+   } 
+}
 
 // static void tty_reader(void *arg) {
 //   device_t *tty = dev->lookup(arg);
@@ -44,7 +56,7 @@ static void os_init() {
 
 static void os_run() {
   iset(true);
-  while(1);
+  yield();
 }
 
 typedef struct handler_info{

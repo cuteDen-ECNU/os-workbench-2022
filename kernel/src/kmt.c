@@ -22,20 +22,20 @@ static void print_task(task_t* head) {
 #endif
 }
 
-static void insert(task_t* head, task_t* task){
+static void insert(task_t** head, task_t* task){
     panic_on(task == NULL, "insert task null");
-    if(head == NULL){
-        head = task;
-        head->bk = task;
-        head->fd = task;
+    if(*head == NULL){
+        *head = task;
+        (*head)->bk = task;
+        (*head)->fd = task;
     }
     else{
-        task->fd = head;
-        task->bk = head->bk;
-        head->bk = task;
+        task->fd = *head;
+        task->bk = (*head)->bk;
+        (*head)->bk = task;
         task->bk->fd = task;
     }
-    print_task(head);
+    print_task(*head);
 }
 
 static void remove(task_t** head, task_t* task){
@@ -109,7 +109,7 @@ int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *a
     task->entry = entry;
     task->stack = pmm->alloc(STACK_SIZE);
     task->context = kcontext((Area){task->stack, task->stack + STACK_SIZE}, entry, arg);
-    insert(task_list, task);
+    insert(&task_list, task);
     return 0;
 }
 
@@ -148,7 +148,7 @@ void kmt_sem_wait(sem_t *sem) {
         // 没有资源，需要等待
         task_t* task = current_tasks[cpu_current()];
         remove(&task_list, task);
-        insert(sem->list_head, task);
+        insert(&sem->list_head, task);
         // 当前线程不能再执行
         task->status = BLOCKED;
         success = false;
@@ -167,7 +167,7 @@ void kmt_sem_signal(sem_t *sem) {
         //释放链表中的一个线程
         task_t* task = sem->list_head; 
         remove(&sem->list_head, task);
-        insert(task_list, task);
+        insert(&task_list, task);
         
         task->status = RUNNABLE;
     } 

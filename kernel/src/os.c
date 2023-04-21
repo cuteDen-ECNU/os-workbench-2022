@@ -1,5 +1,6 @@
 #include <common.h>
 #include <devices.h>
+#include <stdio.h>
 
 sem_t empty, fill;
 #define P kmt->sem_wait
@@ -9,7 +10,7 @@ sem_t empty, fill;
 void producer(void *arg) { 
   while (1) {
     P(&empty); 
-    putch('('); 
+    putch('('); putch('\n');
     V(&fill);
   } 
 }

@@ -42,7 +42,7 @@ static void insert(task_t** head, task_t* task){
 static void remove(task_t** head, task_t* task){
     panic_on(task == NULL, "remove task null"); 
     if((*head)->bk == *head){
-        panic_on((*head)->fd == *head && task == *head, "error task_list!");
+        panic_on(!((*head)->fd == *head && task == *head), "error task_list!");
         head = NULL;
     }
     else{

@@ -2,38 +2,38 @@
 #include <devices.h>
 #include <stdio.h>
 
-sem_t empty, fill;
-#define P kmt->sem_wait
-#define V kmt->sem_signal
-#define DEBUG_LOCAL 
+// sem_t empty, fill;
+// #define P kmt->sem_wait
+// #define V kmt->sem_signal
+// #define DEBUG_LOCAL 
 
-void producer(void *arg) { 
-  while (1) {
-    P(&empty); 
-    putch('('); 
-    V(&fill);
-  } 
-}
-void consumer(void *arg) {
-   while (1) {
-     P(&fill);  
-     putch(')');
-     V(&empty); 
-   } 
-}
-
-// static void tty_reader(void *arg) {
-//   device_t *tty = dev->lookup(arg);
-//   char cmd[128], resp[128], ps[16];
-//   snprintf(ps, 16, "(%s) $ ", arg);
+// void producer(void *arg) { 
 //   while (1) {
-//     tty->ops->write(tty, 0, ps, strlen(ps));
-//     int nread = tty->ops->read(tty, 0, cmd, sizeof(cmd) - 1);
-//     cmd[nread] = '\0';
-//     sprintf(resp, "tty reader task: got %d character(s).\n", strlen(cmd));
-//     tty->ops->write(tty, 0, resp, strlen(resp));
-//   }
+//     P(&empty); 
+//     putch('('); 
+//     V(&fill);
+//   } 
 // }
+// void consumer(void *arg) {
+//    while (1) {
+//      P(&fill);  
+//      putch(')');
+//      V(&empty); 
+//    } 
+// }
+
+static void tty_reader(void *arg) {
+  device_t *tty = dev->lookup(arg);
+  char cmd[128], resp[128], ps[16];
+  snprintf(ps, 16, "(%s) $ ", (const char*)arg);
+  while (1) {
+    tty->ops->write(tty, 0, ps, strlen(ps));
+    int nread = tty->ops->read(tty, 0, cmd, sizeof(cmd) - 1);
+    cmd[nread] = '\0';
+    sprintf(resp, "tty reader task: got %d character(s).\n", strlen(cmd));
+    tty->ops->write(tty, 0, resp, strlen(resp));
+  }
+}
 
 static inline task_t *task_alloc() {
   return pmm->alloc(sizeof(task_t));
@@ -42,9 +42,9 @@ static inline task_t *task_alloc() {
 static void os_init() {
   pmm->init();
   kmt->init();
-  // dev->init();
-  // kmt->create(task_alloc(), "tty_reader", tty_reader, "tty1");
-  // kmt->create(task_alloc(), "tty_reader", tty_reader, "tty2");
+  dev->init();
+  kmt->create(task_alloc(), "tty_reader", tty_reader, "tty1");
+  kmt->create(task_alloc(), "tty_reader", tty_reader, "tty2");
 #ifdef DEBUG_LOCAL
   kmt->sem_init(&empty, "empty", 5);  // 缓冲区大小为 5
   kmt->sem_init(&fill,  "fill",  0);

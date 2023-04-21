@@ -63,9 +63,9 @@ static Context* kmt_context_save(Event ev, Context *context) {
     if (current_tasks[cpu] == NULL){
         current_tasks[cpu] = task_list;
     }else{
-        panic_on(current_tasks[cpu]->status == RUNNING, "current task not running!");
         current_tasks[cpu]->context = context; 
-        current_tasks[cpu]->status = RUNNABLE;
+        panic_on(task_list == NULL, "task list null");
+        current_tasks[cpu] = task_list;
     }
     
     return NULL;
@@ -78,7 +78,7 @@ static Context* kmt_context_schedule(Event ev, Context *context) {
     task_t* task = current_tasks[cpu];
     bool quit_flag = false;
     while(1){
-        
+        panic_on(current_tasks[cpu]->fd == current_tasks[cpu], "current_tasks[cpu].fd == current_tasks[cpu]");
         current_tasks[cpu] = current_tasks[cpu]->fd;
 
         switch (current_tasks[cpu]->status)

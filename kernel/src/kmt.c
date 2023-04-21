@@ -62,6 +62,7 @@ static Context* kmt_context_save(Event ev, Context *context) {
         current_tasks[cpu] = task_list;
     }else{
         current_tasks[cpu]->context = context; 
+        panic_on(current_tasks[cpu]->status == BLOCKED, "Block case"); 
         if (current_tasks[cpu]->status == RUNNING) 
             current_tasks[cpu]->status = RUNNABLE;
         

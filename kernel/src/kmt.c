@@ -85,7 +85,6 @@ static Context* kmt_context_schedule(Event ev, Context *context) {
                 quit_flag = true;
                 break;
             default:
-                current_tasks[cpu] = current_tasks[cpu]->fd; 
                 break;
         }
         if(quit_flag == true && current_tasks[cpu] != task){

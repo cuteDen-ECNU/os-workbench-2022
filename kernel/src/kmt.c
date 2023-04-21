@@ -16,7 +16,7 @@ static void print_task(task_t* head) {
         printf("%s", task->name);
         while(task->fd != head){
             task = task->fd;
-            printf("-> %s", task->name);
+            printf("-> %s", task->status);
         }
         printf("\n");
     }

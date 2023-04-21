@@ -8,7 +8,7 @@ task_t** current_tasks;
 task_t* task_list = NULL;
 
 static void print_task(task_t* head) {
-#ifdef V_PRINT_TASK
+#ifdef VERBOSE_PRINT_TASK
     task_t* task = head;
     if(task == NULL){
         printf("null");

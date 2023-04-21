@@ -17,7 +17,7 @@ void producer(void *arg) {
 void consumer(void *arg) {
    while (1) {
      P(&fill);  
-     putch(')'); 
+     putch(')');putch('\n'); 
      V(&empty); 
    } 
 }

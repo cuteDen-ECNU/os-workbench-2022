@@ -73,6 +73,7 @@ static Context* kmt_context_schedule(Event ev, Context *context) {
     panic_on(task_list == NULL, "schedule null task!");
     
     task_t* task = task_list;
+    current_tasks[cpu] = task_list; 
     print_task(task_list);
     bool quit_flag = false;
     while(1){

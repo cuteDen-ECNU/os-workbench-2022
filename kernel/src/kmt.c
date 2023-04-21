@@ -62,7 +62,8 @@ static Context* kmt_context_save(Event ev, Context *context) {
         current_tasks[cpu] = task_list;
     }else{
         current_tasks[cpu]->context = context; 
-        current_tasks[cpu]->status = RUNNABLE;
+        if (current_tasks[cpu]->status == RUNNING) 
+            current_tasks[cpu]->status = RUNNABLE;
         
     }
     

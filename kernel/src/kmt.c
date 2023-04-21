@@ -72,7 +72,6 @@ static Context* kmt_context_save(Event ev, Context *context) {
 
 static Context* kmt_context_schedule(Event ev, Context *context) {
     int cpu = cpu_current();
-    int cpu_num = cpu_count(); printf("%d", cpu_num);
     panic_on(current_tasks[cpu] == NULL, "schedule null task!");
     
     task_t* task = current_tasks[cpu];

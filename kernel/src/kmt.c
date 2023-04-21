@@ -2,6 +2,7 @@
 #define STACK_SIZE 1024 * 8
 #define MAX_CPU 8
 
+
 task_t** current_tasks;
 
 task_t* task_list = NULL;

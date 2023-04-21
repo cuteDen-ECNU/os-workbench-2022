@@ -13,10 +13,10 @@ static void print_task(task_t* head) {
     if(task == NULL){
         printf("null");
     }else{
-        printf("%s", task->name);
+        printf("%d", task->status);
         while(task->fd != head){
             task = task->fd;
-            printf("-> %s", task->status);
+            printf("-> %d", task->status);
         }
         printf("\n");
     }

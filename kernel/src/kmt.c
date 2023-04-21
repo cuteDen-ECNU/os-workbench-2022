@@ -77,7 +77,7 @@ static Context* kmt_context_schedule(Event ev, Context *context) {
     bool quit_flag = false;
     while(1){
         current_tasks[cpu] = current_tasks[cpu]->fd;
-        print_task(current_tasks[cpu]);
+        
         switch (current_tasks[cpu]->status)
         {
             case RUNNABLE:

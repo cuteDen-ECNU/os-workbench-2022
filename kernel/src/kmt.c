@@ -36,7 +36,6 @@ static void insert(task_t** head, task_t* task){
         (*head)->bk = task;
         task->bk->fd = task;
     }
-    print_task(*head);
 }
 
 static void remove(task_t** head, task_t* task){
@@ -54,7 +53,6 @@ static void remove(task_t** head, task_t* task){
         task->fd = NULL;
         task->bk = NULL;
     }
-    print_task(*head);
 }
 
 static Context* kmt_context_save(Event ev, Context *context) {
@@ -79,7 +77,7 @@ static Context* kmt_context_schedule(Event ev, Context *context) {
     bool quit_flag = false;
     while(1){
         current_tasks[cpu] = current_tasks[cpu]->fd;
-
+        print_task(current_tasks[cpu]);
         switch (current_tasks[cpu]->status)
         {
             case RUNNABLE:

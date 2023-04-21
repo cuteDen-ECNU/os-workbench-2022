@@ -62,7 +62,6 @@ static Context* kmt_context_save(Event ev, Context *context) {
         current_tasks[cpu] = task_list;
     }else{
         current_tasks[cpu]->context = context; 
-        // panic_on(current_tasks[cpu]->status == BLOCKED, "Block case"); 
         if (current_tasks[cpu]->status == BLOCKED) 
             current_tasks[cpu] = task_list; 
         else if (current_tasks[cpu]->status == RUNNING)
@@ -91,6 +90,7 @@ static Context* kmt_context_schedule(Event ev, Context *context) {
         }
         if(quit_flag == true && current_tasks[cpu] != task){
             current_tasks[cpu]->status = RUNNING;
+            printf("%s%d", current_tasks[cpu]->name, current_tasks[cpu]->status);
             break;
         }
     }

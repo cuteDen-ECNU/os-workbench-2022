@@ -95,7 +95,7 @@ static Context* kmt_context_schedule(Event ev, Context *context) {
         }
     }
     
-    return task->context;
+    return current_tasks[cpu]->context;
 }
 
 void kmt_init() {

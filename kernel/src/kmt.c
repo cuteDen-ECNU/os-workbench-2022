@@ -109,6 +109,7 @@ int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *a
     task->entry = entry;
     task->stack = pmm->alloc(STACK_SIZE);
     task->context = kcontext((Area){task->stack, task->stack + STACK_SIZE}, entry, arg);
+    task->status = RUNNABLE;
     insert(&task_list, task);
     return 0;
 }

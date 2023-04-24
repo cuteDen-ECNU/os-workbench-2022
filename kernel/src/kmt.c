@@ -152,7 +152,7 @@ void kmt_sem_wait(sem_t *sem) {
         // 没有资源，需要等待
         task_t* task = current_tasks[cpu_current()];
         remove(&task_list, task);
-        insert(&sem->list_head, task);
+        insert(&sem->wait_list, task);
         // 当前线程不能再执行
         task->status = BLOCKED;
         success = false;
@@ -169,13 +169,46 @@ void kmt_sem_signal(sem_t *sem) {
     sem->count++;
     if (sem->count <= 0){
         //释放链表中的一个线程
-        task_t* task = sem->list_head; 
-        remove(&sem->list_head, task);
+        task_t* task = sem->wait_list; 
+        remove(&sem->wait_list, task);
         insert(&task_list, task);
         
         task->status = RUNNABLE;
     } 
     kmt_spin_unlock(&sem->lock);  
+}
+
+void kmt_mutex_init(mutexlock_t *lk, const char *name) {
+    lk->locked = 0;
+    kmt_spin_init(&lk->lock, name);
+}
+
+void kmt_mutex_lock(mutexlock_t *lk) {
+  int acquired = 0;
+  kmt_spin_lock(&lk->lock);
+  if (lk->locked != 0) {
+    task_t* task = current_tasks[cpu_current()];
+    insert(&lk->wait_list, task);
+    task->status = BLOCKED;
+  } else {
+    lk->locked = 1;
+    acquired = 1;
+  }
+  kmt_spin_unlock(&lk->lock);
+  if (!acquired) yield(); // 主动切换到其他线程执行
+}
+
+void kmt_mutex_unlock(mutexlock_t *lk) {
+  kmt_spin_lock(&lk->lock);
+  if (!lk->wait_list) {
+    task_t* task = lk->wait_list; 
+    remove(&lk->wait_list, task);
+    insert(&task_list, task);
+    task->status = RUNNABLE; // 唤醒之前睡眠的线程
+  } else {
+    lk->locked = 0;
+  }
+  kmt_spin_unlock(&lk->lock);
 }
 
 MODULE_DEF(kmt) = {
@@ -187,4 +220,7 @@ MODULE_DEF(kmt) = {
     .sem_init = kmt_sem_init,
     .sem_wait = kmt_sem_wait,
     .sem_signal = kmt_sem_signal,
+    .mutex_init = kmt_mutex_init,
+    .mutex_lock = kmt_mutex_lock,
+    .mutex_unlock = kmt_mutex_unlock,
 };

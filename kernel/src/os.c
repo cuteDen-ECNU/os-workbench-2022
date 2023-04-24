@@ -68,9 +68,11 @@ typedef struct handler_info{
 }handler_info;
 
 handler_info* handlers_list; // header
+mutexlock_t handler_lock;
 
 static void on_irq(int seq, int event, handler_t handler){
   handler_info* p = handlers_list, *pre = NULL;
+  kmt->mutex_init(&handler_lock, "handler_lock");
   while(p){
     // bool b = (p->seq > seq);
     if(p->seq > seq)break;
@@ -91,8 +93,12 @@ static void on_irq(int seq, int event, handler_t handler){
 }
 static Context *os_trap(Event ev, Context *ctx) {
   Context *next = NULL;
+  
+  kmt->mutex_lock(&handler_lock);
+  handler_info* h = handlers_list;
+  kmt->mutex_unlock(&handler_lock);
 
-  for (handler_info* h = handlers_list; h != NULL; h = h->next) {
+  for (; h != NULL; h = h->next) {
     if (h->event == EVENT_NULL || h->event == ev.event) {
       Context *r = h->handler(ev, ctx);
       panic_on(r && next, "returning multiple contexts");

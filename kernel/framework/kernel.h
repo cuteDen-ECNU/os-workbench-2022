@@ -27,6 +27,7 @@ MODULE(pmm) {
 typedef struct task task_t;
 typedef struct spinlock spinlock_t;
 typedef struct semaphore sem_t;
+typedef struct mutexlock mutexlock_t;
 MODULE(kmt) {
   void (*init)();
   int  (*create)(task_t *task, const char *name, void (*entry)(void *arg), void *arg);
@@ -37,6 +38,9 @@ MODULE(kmt) {
   void (*sem_init)(sem_t *sem, const char *name, int value);
   void (*sem_wait)(sem_t *sem);
   void (*sem_signal)(sem_t *sem);
+  void (*mutex_init)(mutexlock_t* lk, const char *name);
+  void (*mutex_lock)(mutexlock_t *lk);
+  void (*mutex_unlock)(mutexlock_t *lk);
 };
 
 typedef struct device device_t;

@@ -29,6 +29,13 @@ struct semaphore {
   
   int count;
   spinlock_t lock;
-  task_t *list_head;
+  task_t *wait_list;
 };
+
+struct mutexlock {
+  int locked;
+  spinlock_t lock;
+  task_t *wait_list;
+};
+
 #endif

@@ -67,10 +67,10 @@ typedef struct handler_info{
   struct handler_info* next;
 }handler_info;
 
-handler_info* handlers_sorted_by_seq; // header
+handler_info* handlers_list; // header
 
 static void on_irq(int seq, int event, handler_t handler){
-  handler_info* p = handlers_sorted_by_seq, *pre = NULL;
+  handler_info* p = handlers_list, *pre = NULL;
   while(p){
     // bool b = (p->seq > seq);
     if(p->seq > seq)break;
@@ -81,7 +81,7 @@ static void on_irq(int seq, int event, handler_t handler){
     pre = pmm->alloc(sizeof(handler_info));
     pre->seq = seq; pre->event = event; pre->handler = handler;
     pre->next = p;
-    handlers_sorted_by_seq = pre;
+    handlers_list = pre;
   }
   else{
     handler_info* new_handler = pmm->alloc(sizeof(handler_info));
@@ -92,7 +92,7 @@ static void on_irq(int seq, int event, handler_t handler){
 static Context *os_trap(Event ev, Context *ctx) {
   Context *next = NULL;
 
-  for (handler_info* h = handlers_sorted_by_seq; h != NULL; h = h->next) {
+  for (handler_info* h = handlers_list; h != NULL; h = h->next) {
     if (h->event == EVENT_NULL || h->event == ev.event) {
       Context *r = h->handler(ev, ctx);
       panic_on(r && next, "returning multiple contexts");

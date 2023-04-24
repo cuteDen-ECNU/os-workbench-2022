@@ -1,7 +1,14 @@
 #include <os.h>
 #define STACK_SIZE 1024 * 8
 #define MAX_CPU 8
- 
+
+#ifdef TRACE_F
+  #define TRACE_ENTRY printf("[trace] %s:entry\n", __func__)
+  #define TRACE_EXIT printf("[trace] %s:exit\n", __func__)
+#else
+  #define TRACE_ENTRY ((void)0)
+  #define TRACE_EXIT ((void)0)
+#endif
 
 task_t** current_tasks;
 
@@ -24,6 +31,7 @@ static void print_task(task_t* head) {
 }
 
 static void insert(task_t** head, task_t* task){
+    TRACE_ENTRY;
     panic_on(task == NULL, "insert task null");
     if(*head == NULL){
         *head = task;
@@ -36,9 +44,11 @@ static void insert(task_t** head, task_t* task){
         (*head)->bk = task;
         task->bk->fd = task;
     }
+    TRACE_EXIT;
 }
 
 static void remove(task_t** head, task_t* task){
+    TRACE_ENTRY;
     panic_on(task == NULL, "remove task null"); 
     if((*head)->bk == *head){
         panic_on((*head)->fd != *head, "error task_list!");
@@ -54,9 +64,11 @@ static void remove(task_t** head, task_t* task){
         task->fd = NULL;
         task->bk = NULL;
     }
+    TRACE_EXIT;
 }
 
 static Context* kmt_context_save(Event ev, Context *context) {
+    TRACE_ENTRY;
     panic_on(context == NULL, "error context!");
     int cpu = cpu_current();
     if (current_tasks[cpu] == NULL){
@@ -69,11 +81,12 @@ static Context* kmt_context_save(Event ev, Context *context) {
             current_tasks[cpu]->status = RUNNABLE;
         
     }
-    
+    TRACE_EXIT;
     return NULL;
 }
 
 static Context* kmt_context_schedule(Event ev, Context *context) {
+    TRACE_ENTRY;
     int cpu = cpu_current();
     panic_on(task_list == NULL, "schedule null task!");
     task_t* task = task_list;
@@ -95,18 +108,20 @@ static Context* kmt_context_schedule(Event ev, Context *context) {
             break;
         }
     }
-    
+    TRACE_EXIT;
     return current_tasks[cpu]->context;
 }
 
 void kmt_init() {
-    
+    TRACE_ENTRY;
     current_tasks = (task_t**)pmm->alloc(sizeof(task_t*) * cpu_count());
     os->on_irq(sizeof(int) == 4 ? INT32_MIN : INT64_MIN, EVENT_NULL, kmt_context_save);   // 总是最先调用
     os->on_irq(sizeof(int) == 4 ? INT32_MAX : INT64_MAX, EVENT_NULL, kmt_context_schedule);       // 总是最后调用
+    TRACE_EXIT;
 }
 
 int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *arg) {
+    TRACE_ENTRY;
     panic_on(task == NULL, "kmt create error!");
     task->name = name;
     task->entry = entry;
@@ -114,18 +129,23 @@ int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *a
     task->context = kcontext((Area){task->stack, task->stack + STACK_SIZE}, entry, arg);
     task->status = RUNNABLE;
     insert(&task_list, task);
+    TRACE_EXIT;
     return 0;
 }
 
 void kmt_teardown(task_t *task) {
+    TRACE_ENTRY;
     panic_on(task->status != NEVER_SCHEDUlE, "kmt teardown error!");
     pmm->free(task->stack);
+    TRACE_EXIT;
 }
 
 void kmt_spin_init(spinlock_t *lk, const char *name) {
+    TRACE_ENTRY;
     panic_on(lk == NULL, "kmt spin init error!");
     lk->name = name;
     lk->locked = UNLOCK;
+    TRACE_EXIT;
 }
 
 void kmt_spin_lock(spinlock_t *lk){
@@ -139,12 +159,15 @@ void kmt_spin_unlock(spinlock_t *lk) {
 }
 
 void kmt_sem_init(sem_t *sem, const char *name, int value) {
+    TRACE_ENTRY;
     panic_on(sem == NULL, "kmt sem init error!");
     kmt_spin_init(&sem->lock, name);
     sem->count = value;
+    TRACE_EXIT;
 }
 
 void kmt_sem_wait(sem_t *sem) {
+    TRACE_ENTRY;
     int success = true;
     kmt_spin_lock(&sem->lock); // 获得自旋锁
     sem->count--; // 自旋锁保证原子性
@@ -162,9 +185,11 @@ void kmt_sem_wait(sem_t *sem) {
                  // (注意此时可能有线程执行 V 操作)
         yield(); // 引发一次上下文切换
     }
+    TRACE_EXIT;
 }
 
 void kmt_sem_signal(sem_t *sem) {
+    TRACE_ENTRY;
     kmt_spin_lock(&sem->lock); 
     sem->count++;
     if (sem->count <= 0){
@@ -176,41 +201,48 @@ void kmt_sem_signal(sem_t *sem) {
         task->status = RUNNABLE;
     } 
     kmt_spin_unlock(&sem->lock);  
+    TRACE_EXIT;
 }
 
 void kmt_mutex_init(mutexlock_t *lk, const char *name) {
+    TRACE_ENTRY;
     lk->locked = 0;
     lk->wait_list = NULL;
     kmt_spin_init(&lk->lock, name);
+    TRACE_EXIT;
 }
 
 void kmt_mutex_lock(mutexlock_t *lk) {
-  int acquired = 0;
-  kmt_spin_lock(&lk->lock);
-  if (lk->locked != 0) {
-    task_t* task = current_tasks[cpu_current()];
-    remove(&task_list, task);
-    insert(&lk->wait_list, task);
-    task->status = BLOCKED;
-  } else {
-    lk->locked = 1;
-    acquired = 1;
-  }
-  kmt_spin_unlock(&lk->lock);
-  if (!acquired) yield(); // 主动切换到其他线程执行
+    TRACE_ENTRY;
+    int acquired = 0;
+    kmt_spin_lock(&lk->lock);
+    if (lk->locked != 0) {
+        task_t* task = current_tasks[cpu_current()];
+        remove(&task_list, task);
+        insert(&lk->wait_list, task);
+        task->status = BLOCKED;
+    } else {
+        lk->locked = 1;
+        acquired = 1;
+    }
+    kmt_spin_unlock(&lk->lock);
+    if (!acquired) yield(); // 主动切换到其他线程执行
+    TRACE_EXIT;
 }
 
 void kmt_mutex_unlock(mutexlock_t *lk) {
-  kmt_spin_lock(&lk->lock);
-  if (!lk->wait_list) {
-    task_t* task = lk->wait_list; 
-    remove(&lk->wait_list, task);
-    insert(&task_list, task);
-    task->status = RUNNABLE; // 唤醒之前睡眠的线程
-  } else {
-    lk->locked = 0;
-  }
-  kmt_spin_unlock(&lk->lock);
+    TRACE_ENTRY;
+    kmt_spin_lock(&lk->lock);
+    if (!lk->wait_list) {
+        task_t* task = lk->wait_list; 
+        remove(&lk->wait_list, task);
+        insert(&task_list, task);
+        task->status = RUNNABLE; // 唤醒之前睡眠的线程
+    } else {
+        lk->locked = 0;
+    }
+    kmt_spin_unlock(&lk->lock);
+    TRACE_EXIT;
 }
 
 MODULE_DEF(kmt) = {

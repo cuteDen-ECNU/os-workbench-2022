@@ -180,6 +180,7 @@ void kmt_sem_signal(sem_t *sem) {
 
 void kmt_mutex_init(mutexlock_t *lk, const char *name) {
     lk->locked = 0;
+    lk->wait_list = NULL;
     kmt_spin_init(&lk->lock, name);
 }
 
@@ -188,6 +189,7 @@ void kmt_mutex_lock(mutexlock_t *lk) {
   kmt_spin_lock(&lk->lock);
   if (lk->locked != 0) {
     task_t* task = current_tasks[cpu_current()];
+    remove(&task_list, task);
     insert(&lk->wait_list, task);
     task->status = BLOCKED;
   } else {

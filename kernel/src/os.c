@@ -57,7 +57,7 @@ static void os_init() {
 
 static void os_run() {
   iset(true);
-  yield();
+  while(1);
 }
 
 typedef struct handler_info{

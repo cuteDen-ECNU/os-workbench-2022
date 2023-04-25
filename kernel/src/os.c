@@ -39,10 +39,15 @@ static inline task_t *task_alloc() {
   return pmm->alloc(sizeof(task_t));
 }
 
+static void idle() {
+  while (1);
+}
+
 static void os_init() {
   pmm->init();
   kmt->init();
   dev->init();
+  kmt->create(task_alloc(), "idle", idle, "idle");
   kmt->create(task_alloc(), "tty_reader", tty_reader, "tty1");
   kmt->create(task_alloc(), "tty_reader", tty_reader, "tty2");
 #ifdef DEBUG_LOCAL

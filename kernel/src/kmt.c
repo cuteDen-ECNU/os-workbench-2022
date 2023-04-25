@@ -89,7 +89,7 @@ static Context* kmt_context_schedule(Event ev, Context *context) {
     TRACE_ENTRY;
     int cpu = cpu_current();
     panic_on(task_list == NULL, "schedule null task!");
-    task_t* task = task_list;
+    
     bool quit_flag = false;
     while(1){
         print_task(current_tasks[cpu]);
@@ -102,7 +102,7 @@ static Context* kmt_context_schedule(Event ev, Context *context) {
             default:
                 break;
         }
-        if(quit_flag == true && current_tasks[cpu] != task){
+        if(quit_flag == true){
             current_tasks[cpu]->status = RUNNING;
             // printf("%s%d\n", current_tasks[cpu]->name, current_tasks[cpu]->status);
             break;

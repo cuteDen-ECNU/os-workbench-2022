@@ -47,9 +47,9 @@ static void os_init() {
   pmm->init();
   kmt->init();
   dev->init();
-  kmt->create(task_alloc(), "idle", idle, "idle");
   kmt->create(task_alloc(), "tty_reader", tty_reader, "tty1");
   kmt->create(task_alloc(), "tty_reader", tty_reader, "tty2");
+  kmt->create(task_alloc(), "idle", idle, "idle");
 #ifdef DEBUG_LOCAL
   kmt->sem_init(&empty, "empty", 5);  // 缓冲区大小为 5
   kmt->sem_init(&fill,  "fill",  0);

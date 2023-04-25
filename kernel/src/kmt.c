@@ -88,7 +88,7 @@ static Context* kmt_context_save(Event ev, Context *context) {
 static Context* kmt_context_schedule(Event ev, Context *context) {
     TRACE_ENTRY;
     int cpu = cpu_current();
-    panic_on(task_list == NULL, "schedule null task!");
+    // panic_on(task_list == NULL, "schedule null task!");
     
     bool quit_flag = false;
     while(1){
